@@ -1,0 +1,24 @@
+version: "3.7"
+
+services:
+  todo:
+    image: suhothayan/hadoop-spark-pig-hive:2.9.2
+    container_name: todo
+    ports:
+      - 50070:50070
+      - 8088:8088
+      - 8080:8080
+    volumes:
+      # - ./script.hql:/script.hql
+      - ./data/branch_trace.csv:/branch_trace.csv
+      - ./scripts:/scripts
+      - ./mapred-site.xml:/usr/local/hadoop/etc/hadoop/mapred-site.xml
+    entrypoint: >
+      sh -c "
+      chmod +x /usr/local/spark/conf/spark-env.sh &&
+      /etc/bootstrap.sh &&
+      hdfs dfs -mkdir -p /user/data &&
+      hdfs dfs -put /branch_trace.csv /user/data/ &&
+      /usr/local/hadoop/sbin/mr-jobhistory-daemon.sh start historyserver &&
+      tail -f /dev/null
+      "
